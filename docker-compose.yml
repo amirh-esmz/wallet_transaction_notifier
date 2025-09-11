@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  api:
+    build: .
+    environment:
+      - APP_PORT=8080
+      - MONGO_URI=mongodb://mongo:27017
+      - MONGO_DB=wallet_notifier
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - POLL_INTERVAL_SECONDS=30
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+volumes:
+  mongo_data: {}
+
+
