@@ -12,10 +12,7 @@ type Config struct {
     MongoURI         string
     DatabaseName     string
     TelegramBotToken string
-    TelegramChatID   string
-    PollInterval     time.Duration
     JWTSecret        string
-    EtherscanAPIKey  string
     EthWSURL         string
 }
 
@@ -25,13 +22,10 @@ func Load() Config {
         MongoURI:         getEnv("MONGO_URI", "mongodb://mongo:27017"),
         DatabaseName:     getEnv("MONGO_DB", "wallet_notifier"),
         TelegramBotToken: getEnv("TELEGRAM_BOT_TOKEN", ""),
-        TelegramChatID:   getEnv("TELEGRAM_CHAT_ID", ""),
-        PollInterval:     getEnvDurationSeconds("POLL_INTERVAL_SECONDS", 30),
         JWTSecret:        getEnv("JWT_SECRET", "dev-secret"),
-        EtherscanAPIKey:  getEnv("ETHERSCAN_API_KEY", ""),
-        EthWSURL:         getEnv("ETH_WS_URL", ""),
+        EthWSURL:         getEnv("ETH_WS_URL", "ws://localhost:8546"),
     }
-    log.Printf("config loaded: port=%s db=%s poll=%s", cfg.AppPort, cfg.DatabaseName, cfg.PollInterval)
+    log.Printf("config loaded: port=%s db=%s", cfg.AppPort, cfg.DatabaseName)
     return cfg
 }
 

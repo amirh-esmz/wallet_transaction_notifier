@@ -28,7 +28,7 @@ func main() {
     srv := httpserver.NewServer(cfg, eb, walletsRepo)
 
     // Start services: Ethereum watcher and notifier dispatcher
-    eth := blockchain.NewEthereumEventAdapter(eb, cfg.EthWSURL)
+    eth := blockchain.NewEthereumEventAdapter(eb, cfg.EthWSURL, subsRepo)
     _ = eth.Subscribe("0x0000000000000000000000000000000000000000")
     go func() {
         if err := eth.Run(context.Background()); err != nil {
@@ -36,13 +36,20 @@ func main() {
         }
     }()
 
-    notifier := notifiers.NewTelegramNotifier(cfg.TelegramBotToken, cfg.TelegramChatID)
+    notifier, err := notifiers.NewTelegramNotifier(cfg.TelegramBotToken, subsRepo)
+    if err != nil {
+        log.Printf("failed to create telegram notifier: %v", err)
+    }
     app := services.NewAppService(eb, subsRepo, notifRepo, notifier)
     go app.Run(context.Background())
 
     // Telegram bot long polling
-    bot := services.NewTelegramBotService(cfg.TelegramBotToken, sessionsRepo, subsRepo, notifRepo)
-    go bot.Run(context.Background())
+    bot, err := services.NewTelegramBotService(cfg.TelegramBotToken, sessionsRepo, subsRepo, notifRepo)
+    if err != nil {
+        log.Printf("failed to create telegram bot: %v", err)
+    } else {
+        go bot.Run(context.Background())
+    }
 
     // graceful shutdown
     ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)

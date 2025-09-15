@@ -43,4 +43,43 @@ type TransactionEvent struct {
     Timestamp  int64      `json:"timestamp"`
 }
 
+// Subscription ties a chat to a blockchain/address.
+type Subscription struct {
+    ChatID     string `json:"chatId"`
+    Blockchain string `json:"blockchain"`
+    Address    string `json:"address"`
+}
+
+// UserState represents the current state of a user in the bot conversation
+type UserState string
+
+const (
+    StateIdle           UserState = "idle"
+    StateSelectBlockchain UserState = "select_blockchain"
+    StateAddAddress     UserState = "add_address"
+    StateRemoveAddress  UserState = "remove_address"
+    StateViewNotifications UserState = "view_notifications"
+)
+
+// TelegramSession represents a user's session state
+type TelegramSession struct {
+    ChatID     string    `json:"chatId"`
+    State      UserState `json:"state"`
+    LastAction string    `json:"lastAction,omitempty"`
+    CreatedAt  time.Time `json:"createdAt"`
+    UpdatedAt  time.Time `json:"updatedAt"`
+}
+
+// Notification log for a chat/address.
+type Notification struct {
+    ChatID     string     `json:"chatId"`
+    Blockchain string     `json:"blockchain"`
+    Address    string     `json:"address"`
+    TxHash     string     `json:"txHash"`
+    Direction  Direction  `json:"direction"`
+    Amount     float64    `json:"amount"`
+    Currency   string     `json:"currency"`
+    Timestamp  int64      `json:"timestamp"`
+}
+
 

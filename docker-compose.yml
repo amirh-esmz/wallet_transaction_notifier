@@ -7,11 +7,13 @@ services:
       - MONGO_URI=mongodb://mongo:27017
       - MONGO_DB=wallet_notifier
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - POLL_INTERVAL_SECONDS=30
+      - ETH_WS_URL=http://ethereum:8545
+      - JWT_SECRET=${JWT_SECRET:-dev-secret}
     ports:
       - "8080:8080"
     depends_on:
       - mongo
+      - ethereum
   mongo:
     image: mongo:7
     restart: unless-stopped
@@ -19,7 +21,34 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+  ethereum:
+    image: ethereum/client-go:latest
+    restart: unless-stopped
+    command: >
+      --sepolia
+      --http
+      --http.addr 0.0.0.0
+      --http.port 8545
+      --http.api eth,net,web3,admin
+      --ws
+      --ws.addr 0.0.0.0
+      --ws.port 8546
+      --ws.api eth,net,web3,admin
+      --syncmode snap
+      --maxpeers 50
+      --cache 512
+      --datadir /ethereum
+      --ipcdisable
+      --discovery.v5=false
+    ports:
+      - "8545:8545"  # HTTP RPC
+      - "8546:8546"  # WebSocket RPC
+    volumes:
+      - ethereum_data:/ethereum
+    environment:
+      - ETHEREUM_CACHE=512
 volumes:
   mongo_data: {}
+  ethereum_data: {}
 
 

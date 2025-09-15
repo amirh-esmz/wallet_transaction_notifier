@@ -42,7 +42,7 @@ func (a *AppService) dispatch(evt domain.TransactionEvent) {
     }
     for _, s := range subs {
         // Save notification
-        _ = a.notifs.Save(context.Background(), ports.Notification{
+        _ = a.notifs.Save(context.Background(), domain.Notification{
             ChatID:     s.ChatID,
             Blockchain: evt.Blockchain,
             Address:    evt.WalletID,
