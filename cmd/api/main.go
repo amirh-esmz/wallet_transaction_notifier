@@ -21,20 +21,42 @@ func main() {
     cfg := config.Load()
 
     eb := eventbus.NewInMemoryEventBus()
-    walletsRepo, _ := repository.NewMongoWalletRepository(cfg.MongoURI, cfg.DatabaseName)
-    sessionsRepo, _ := repository.NewMongoSessionRepository(cfg.MongoURI, cfg.DatabaseName)
-    subsRepo, _ := repository.NewMongoSubscriptionRepository(cfg.MongoURI, cfg.DatabaseName)
-    notifRepo, _ := repository.NewMongoNotificationRepository(cfg.MongoURI, cfg.DatabaseName)
+    walletsRepo, err := repository.NewMongoWalletRepository(cfg.MongoURI, cfg.DatabaseName)
+    if err != nil {
+        log.Printf("❌ Failed to create wallet repository: %v", err)
+    }
+    sessionsRepo, err := repository.NewMongoSessionRepository(cfg.MongoURI, cfg.DatabaseName)
+    if err != nil {
+        log.Printf("❌ Failed to create session repository: %v", err)
+    }
+    subsRepo, err := repository.NewMongoSubscriptionRepository(cfg.MongoURI, cfg.DatabaseName)
+    if err != nil {
+        log.Printf("❌ Failed to create subscription repository: %v", err)
+    }
+    notifRepo, err := repository.NewMongoNotificationRepository(cfg.MongoURI, cfg.DatabaseName)
+    if err != nil {
+        log.Printf("❌ Failed to create notification repository: %v", err)
+        log.Printf("MongoURI: %s, DatabaseName: %s", cfg.MongoURI, cfg.DatabaseName)
+    } else {
+        log.Printf("✅ Notification repository created successfully")
+    }
     srv := httpserver.NewServer(cfg, eb, walletsRepo)
 
     // Start services: Ethereum watcher and notifier dispatcher
     eth := blockchain.NewEthereumEventAdapter(eb, cfg.EthWSURL, subsRepo)
-    _ = eth.Subscribe("0x0000000000000000000000000000000000000000")
     go func() {
         if err := eth.Run(context.Background()); err != nil {
             log.Printf("ethereum adapter error: %v", err)
         }
     }()
+
+    // Start Bitcoin watcher
+    // btc := blockchain.NewBitcoinEventAdapter(eb, cfg.BitcoinRPCURL, cfg.BitcoinRPCUser, cfg.BitcoinRPCPass, subsRepo)
+    // go func() {
+    //     if err := btc.Run(context.Background()); err != nil {
+    //         log.Printf("bitcoin adapter error: %v", err)
+    //     }
+    // }()
 
     notifier, err := notifiers.NewTelegramNotifier(cfg.TelegramBotToken, subsRepo)
     if err != nil {

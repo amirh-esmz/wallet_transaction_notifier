@@ -3,6 +3,8 @@ module github.com/you/wallet_transaction_notifier
 go 1.23.3
 
 require (
+	github.com/btcsuite/btcd v0.24.2
+	github.com/btcsuite/btcd/chaincfg/chainhash v1.1.0
 	github.com/ethereum/go-ethereum v1.14.11
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
@@ -15,18 +17,23 @@ require (
 	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/bits-and-blooms/bitset v1.13.0 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.4 // indirect
+	github.com/btcsuite/btcd/btcutil v1.1.5 // indirect
+	github.com/btcsuite/btclog v0.0.0-20170628155309-84c8d2346e9f // indirect
+	github.com/btcsuite/go-socks v0.0.0-20170105172521-4720035b7bfd // indirect
+	github.com/btcsuite/websocket v0.0.0-20150119174127-31079b680792 // indirect
 	github.com/consensys/bavard v0.1.13 // indirect
 	github.com/consensys/gnark-crypto v0.12.1 // indirect
 	github.com/crate-crypto/go-ipa v0.0.0-20240223125850-b1e8a79f509c // indirect
 	github.com/crate-crypto/go-kzg-4844 v1.0.0 // indirect
 	github.com/deckarep/golang-set/v2 v2.6.0 // indirect
+	github.com/decred/dcrd/crypto/blake256 v1.0.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
 	github.com/ethereum/c-kzg-4844 v1.0.0 // indirect
 	github.com/ethereum/go-verkle v0.1.1-0.20240829091221-dffa7562dbe9 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/snappy v0.0.5-0.20220116011046-fa5810519dcb // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/holiman/uint256 v1.3.1 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect

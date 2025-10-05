@@ -213,21 +213,106 @@ func (r *MongoSubscriptionRepository) ListSubscribersByAddress(ctx context.Conte
     return subscriptions, nil
 }
 
+func (r *MongoSubscriptionRepository) GetUniqueAddresses(ctx context.Context, blockchain string) ([]string, error) {
+    collection := mongoDB.Collection("subscriptions")
+    
+    filter := bson.M{
+        "blockchain": blockchain,
+    }
+    
+    // Use aggregation to get unique addresses
+    pipeline := []bson.M{
+        {"$match": filter},
+        {"$group": bson.M{
+            "_id": "$address",
+        }},
+        {"$project": bson.M{
+            "address": "$_id",
+            "_id":     0,
+        }},
+    }
+    
+    cursor, err := collection.Aggregate(ctx, pipeline)
+    if err != nil {
+        return nil, err
+    }
+    defer cursor.Close(ctx)
+    
+    var results []struct {
+        Address string `bson:"address"`
+    }
+    
+    if err = cursor.All(ctx, &results); err != nil {
+        return nil, err
+    }
+    
+    addresses := make([]string, len(results))
+    for i, result := range results {
+        addresses[i] = result.Address
+    }
+    
+    return addresses, nil
+}
+
 // Notifications
 type MongoNotificationRepository struct{}
 
 func NewMongoNotificationRepository(uri string, dbName string) (ports.NotificationRepository, error) {
+    if err := initMongoDB(uri, dbName); err != nil {
+        return nil, err
+    }
     return &MongoNotificationRepository{}, nil
 }
 
-func (r *MongoNotificationRepository) Save(ctx context.Context, n domain.Notification) error {
-    _ = ctx; _ = n
+func (r *MongoNotificationRepository) Save(ctx context.Context, n domain.Notification) error {    
+    if mongoDB == nil {
+        log.Printf("❌ MongoDB database is nil - connection not initialized")
+        return errors.New("MongoDB database not initialized")
+    }
+    
+    collection := mongoDB.Collection("notifications")
+    
+    // Add timestamp if not set
+    if n.Timestamp == 0 {
+        n.Timestamp = time.Now().Unix()
+    }
+    
+    _ , err := collection.InsertOne(ctx, n)
+    if err != nil {
+        log.Printf("❌ MongoDB InsertOne failed: %v", err)
+        return err
+    }
+    
     return nil
 }
 
 func (r *MongoNotificationRepository) ListByAddress(ctx context.Context, chatID string, blockchain string, address string, limit int) ([]domain.Notification, error) {
-    _ = ctx; _ = chatID; _ = blockchain; _ = address; _ = limit
-    return []domain.Notification{}, nil
+    collection := mongoDB.Collection("notifications")
+    
+    filter := bson.M{
+        "chatId":     chatID,
+        "blockchain": blockchain,
+        "address":    address,
+    }
+    
+    opts := options.Find()
+    opts.SetSort(bson.M{"timestamp": -1}) // Sort by timestamp descending (newest first)
+    if limit > 0 {
+        opts.SetLimit(int64(limit))
+    }
+    
+    cursor, err := collection.Find(ctx, filter, opts)
+    if err != nil {
+        return nil, err
+    }
+    defer cursor.Close(ctx)
+    
+    var notifications []domain.Notification
+    if err = cursor.All(ctx, &notifications); err != nil {
+        return nil, err
+    }
+    
+    return notifications, nil
 }
 
 

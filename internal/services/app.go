@@ -40,9 +40,12 @@ func (a *AppService) dispatch(evt domain.TransactionEvent) {
         log.Printf("list subs error: %v", err)
         return
     }
+    
     for _, s := range subs {
+        log.Printf("Processing notification for chat %s, address %s", s.ChatID, evt.WalletID)
+        
         // Save notification
-        _ = a.notifs.Save(context.Background(), domain.Notification{
+        notification := domain.Notification{
             ChatID:     s.ChatID,
             Blockchain: evt.Blockchain,
             Address:    evt.WalletID,
@@ -51,7 +54,14 @@ func (a *AppService) dispatch(evt domain.TransactionEvent) {
             Amount:     evt.Amount,
             Currency:   evt.Currency,
             Timestamp:  evt.Timestamp,
-        })
+        }
+        
+        log.Printf("Attempting to save notification: %+v", notification)
+        if err := a.notifs.Save(context.Background(), notification); err != nil {
+            log.Printf("❌ Failed to save notification for chat %s: %v", s.ChatID, err)
+        } else {
+            log.Printf("✅ Successfully saved notification for chat %s", s.ChatID)
+        }
         for _, n := range a.notifiers {
             if err := n.SendAlert(s.ChatID, evt); err != nil {
                 log.Printf("notifier error: %v", err)

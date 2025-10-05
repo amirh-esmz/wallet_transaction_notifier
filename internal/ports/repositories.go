@@ -26,6 +26,7 @@ type SubscriptionRepository interface {
     RemoveSubscription(ctx context.Context, chatID string, blockchain string, address string) error
     ListSubscriptions(ctx context.Context, chatID string, blockchain string) ([]domain.Subscription, error)
     ListSubscribersByAddress(ctx context.Context, blockchain string, address string) ([]domain.Subscription, error)
+    GetUniqueAddresses(ctx context.Context, blockchain string) ([]string, error)
 }
 
 type NotificationRepository interface {

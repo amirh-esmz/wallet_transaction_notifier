@@ -14,16 +14,22 @@ type Config struct {
     TelegramBotToken string
     JWTSecret        string
     EthWSURL         string
+    BitcoinRPCURL    string
+    BitcoinRPCUser   string
+    BitcoinRPCPass   string
 }
 
 func Load() Config {
     cfg := Config{
         AppPort:          getEnv("APP_PORT", "8080"),
-        MongoURI:         getEnv("MONGO_URI", "mongodb://mongo:27017"),
+        MongoURI:         getEnv("MONGO_URI", "mongodb://localhost:27017"),
         DatabaseName:     getEnv("MONGO_DB", "wallet_notifier"),
         TelegramBotToken: getEnv("TELEGRAM_BOT_TOKEN", ""),
-        JWTSecret:        getEnv("JWT_SECRET", "dev-secret"),
-        EthWSURL:         getEnv("ETH_WS_URL", "ws://localhost:8546"),
+        JWTSecret:        getEnv("JWT_SECRET", ""),
+        EthWSURL:         getEnv("ETH_WS_URL", "wss://eth-mainnet.g.alchemy.com/v2/demo"),
+        BitcoinRPCURL:    getEnv("BITCOIN_RPC_URL", "localhost:8332"),
+        BitcoinRPCUser:   getEnv("BITCOIN_RPC_USER", "bitcoin"),
+        BitcoinRPCPass:   getEnv("BITCOIN_RPC_PASS", "bitcoin"),
     }
     log.Printf("config loaded: port=%s db=%s", cfg.AppPort, cfg.DatabaseName)
     return cfg

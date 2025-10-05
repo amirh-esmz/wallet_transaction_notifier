@@ -3,17 +3,19 @@ services:
   api:
     build: .
     environment:
-      - APP_PORT=8080
+      - APP_PORT=8081
       - MONGO_URI=mongodb://mongo:27017
       - MONGO_DB=wallet_notifier
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - ETH_WS_URL=http://ethereum:8545
-      - JWT_SECRET=${JWT_SECRET:-dev-secret}
+      - ETH_WS_URL=${ETH_WS_URL}
+      - BITCOIN_RPC_URL=${BITCOIN_RPC_URL}
+      - BITCOIN_RPC_USER=${BITCOIN_RPC_USER}
+      - BITCOIN_RPC_PASS=${BITCOIN_RPC_PASS}
+      - JWT_SECRET=${JWT_SECRET}
     ports:
-      - "8080:8080"
+      - "8081:8081"
     depends_on:
       - mongo
-      - ethereum
   mongo:
     image: mongo:7
     restart: unless-stopped
@@ -21,34 +23,9 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
-  ethereum:
-    image: ethereum/client-go:latest
-    restart: unless-stopped
-    command: >
-      --sepolia
-      --http
-      --http.addr 0.0.0.0
-      --http.port 8545
-      --http.api eth,net,web3,admin
-      --ws
-      --ws.addr 0.0.0.0
-      --ws.port 8546
-      --ws.api eth,net,web3,admin
-      --syncmode snap
-      --maxpeers 50
-      --cache 512
-      --datadir /ethereum
-      --ipcdisable
-      --discovery.v5=false
-    ports:
-      - "8545:8545"  # HTTP RPC
-      - "8546:8546"  # WebSocket RPC
-    volumes:
-      - ethereum_data:/ethereum
-    environment:
-      - ETHEREUM_CACHE=512
+
+
 volumes:
   mongo_data: {}
-  ethereum_data: {}
 
 
